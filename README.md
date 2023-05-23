@@ -1,10 +1,10 @@
-# Generative Recursion
+# Generative Recursion - Fractals
 
 * Notes from How to Design Complex Data - Week 5 - Generative Recursion
 
 ---
 
-## Fractals
+## Sierpinski Triangle
 
 PROBLEM:
 Design a function that consumes a number and produces a Sierpinski triangle of that size. Your function should use generative recursion.
@@ -75,17 +75,31 @@ Trivial answer: what to do if there is no more recursion -> make a triangle of t
                         (beside sub sub))))))
 ```
 
+### Termination argument (3 parts)
+
+> Base case: `(<= s CUTOFF)`
+> Reduction step: `(/ s 2)`
+> Argument that repeated application of reduction step will eventually reach base case:
+> As long as the cutoff is > 0 and s starts at >=0, repeated division by 2 will eventually be less than cutoff.
+
+
+NOTE: You should always include a termination argument when doing generative recursion. To prove your function will end eventually.
 
 ---
 
 
-#### Sierpinski Square
+## Sierpinski Square
 
+### Signature
 ```racket
 Number -> Image
 ```
+
+### Purpose
 interp.: produce Sierpinski carpet of given size
 
+
+### Examples/tests
 ```racket
 (check-expect (scarpet CUTOFF) (square CUTOFF "outline" "red"))
 
@@ -99,7 +113,7 @@ interp.: produce Sierpinski carpet of given size
                        )))
 ```
 
-Template
+### Template
 ```racket
 (define (genrec-fn d)
   (cond [(trivial? d) (trivial-answer d)]
@@ -108,7 +122,7 @@ Template
               (genrec-fn (next-problem d)))]))
 ```
 
-Function
+### Function
 ```racket
 (define (scarpet s)
   (if (<= s CUTOFF)
@@ -120,3 +134,56 @@ Function
                          (beside sub blk sub)
                          (beside sub sub sub))))))
 ```
+
+### Termination argument (3 parts)
+
+> Base case: `(<= s CUTOFF)`
+> Reduction step: `(/ s 3)`
+> Argument that repeated application of reduction step will eventually reach base case:
+> As long as the cutoff is > 0 and s starts at >=0, repeated division by 3 will eventually be less than cutoff.
+
+---
+
+## Collatz Conjecture
+
+```
+if n is even => f(n) = n/2
+if n is odd  => f(n) = 3n + 1
+```
+
+This process will eventually reach the number 1, regardless of which positive integer is chosen initially.
+
+### Signature
+```racket
+Integer[>=1] -> (listof Integer[>=1])
+```
+
+### Purpose
+interp.: produce hailstone sequence for n
+
+### Examples/tests:
+```racket
+(check-expect (hailstones 1) (list 1))
+(check-expect (hailstones 2) (list 2 1))
+(check-expect (hailstones 4) (list 4 2 1))
+(check-expect (hailstones 5) (list 5 16 8 4 2 1))
+```
+
+### Function
+```racket
+(define (hailstones n)
+  (if (= n 1)
+    (list 1)
+    (cons n
+        (if (even? n)
+          (hailstones (/ n 2))
+          (hailstones (add1 (* n 3)))))))
+```
+
+### Termination argument (3 parts)
+
+> Base case: `(= n 1)`
+> Reduction step: if n is even => `(/ n 2)`, if n is odd => `(add1 (* n 3))`
+> Argument that repeated application of reduction step will eventually reach base case:
+> ??? Mathematicians have yet to prove this - there has been no counterexample -> there is no n that disproves this thus far
+
