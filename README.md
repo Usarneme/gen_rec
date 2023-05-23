@@ -49,7 +49,7 @@ produce a Sierpinski triangle of the given size
 (define (stri s) (square s "solid" "white"))
 ```
 
-Template:
+### Template:
 From https://courses.edx.org/courses/course-v1:UBCx+HtC2x+2T2017/77860a93562d40bda45e452ea064998b/#GenRec
 ```racket
 (define (genrec-fn d)
@@ -60,6 +60,7 @@ From https://courses.edx.org/courses/course-v1:UBCx+HtC2x+2T2017/77860a93562d40b
 ```
 
 Trivial: when the size <= CUTOFF
+
 Trivial answer: what to do if there is no more recursion -> make a triangle of that size
 
 
