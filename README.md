@@ -21,15 +21,20 @@ If each triangle has a side length of s, then each sub-triangle will have a side
 We just keep making them until they get small enough (??)
 
 "Small enough" constant:
+```racket
 (define CUTOFF 2)
+```
 
 ### Signature:
+```racket
 Number -> Image
+```
 
 ### Purpose:
 produce a Sierpinski triangle of the given size
 
 ### Examples/tests:
+```racket
 (check-expect (stri CUTOFF) (triange CUTOFF "outline" "red"))
 
 (check-expect (stri (* CUTOFF 2)
@@ -37,23 +42,29 @@ produce a Sierpinski triangle of the given size
            (local [(define sub (triangle CUTOFF "outline" "red"))]
            (above sub
                   (beside sub sub)))))
+```
 
 ### Stub:
+```racket
 (define (stri s) (square 0 "solid" "white"))
+```
 
 Template:
 From https://courses.edx.org/courses/course-v1:UBCx+HtC2x+2T2017/77860a93562d40bda45e452ea064998b/#GenRec
+```racket
 (define (genrec-fn d)
   (cond [(trivial? d) (trivial-answer d)]
         [else
          (... d 
               (genrec-fn (next-problem d)))]))
+```
 
 Trivial: when the size <= CUTOFF
 Trivial answer: what to do if there is no more recursion -> make a triangle of that size
 
 
 ### Function:
+```racket
 (define (stri s)
   (if (<= S CUTOFF)
       (triangle s "outline" "red")
@@ -61,7 +72,7 @@ Trivial answer: what to do if there is no more recursion -> make a triangle of t
                (local [(define sub (stri (/ s 2)))]
                  (above sub
                         (beside sub sub))))))
-
+```
 
 
 ---
