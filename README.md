@@ -35,7 +35,7 @@ produce a Sierpinski triangle of the given size
 
 ### Examples/tests:
 ```racket
-(check-expect (stri CUTOFF) (triange CUTOFF "outline" "red"))
+(check-expect (stri CUTOFF) (triangle CUTOFF "outline" "red"))
 
 (check-expect (stri (* CUTOFF 2)
   (overlay (triangle (* 2 CUTOFF) "outline" "red")
@@ -46,7 +46,7 @@ produce a Sierpinski triangle of the given size
 
 ### Stub:
 ```racket
-(define (stri s) (square 0 "solid" "white"))
+(define (stri s) (square s "solid" "white"))
 ```
 
 Template:
@@ -55,7 +55,7 @@ From https://courses.edx.org/courses/course-v1:UBCx+HtC2x+2T2017/77860a93562d40b
 (define (genrec-fn d)
   (cond [(trivial? d) (trivial-answer d)]
         [else
-         (... d 
+         (... d
               (genrec-fn (next-problem d)))]))
 ```
 
