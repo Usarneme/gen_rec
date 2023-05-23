@@ -79,3 +79,44 @@ Trivial answer: what to do if there is no more recursion -> make a triangle of t
 ---
 
 
+#### Sierpinski Square
+
+```racket
+Number -> Image
+```
+interp.: produce Sierpinski carpet of given size
+
+```racket
+(check-expect (scarpet CUTOFF) (square CUTOFF "outline" "red"))
+
+(check-expect (scarpet (* CUTOFF 3))
+              (overlay (square (* CUTOFF 3) "outline" "red")
+                       (local [(define sub (square CUTOFF "outline" "red"))
+                               (define blk (square CUTOFF "outline" "white"))]
+                        (above (beside sub sub sub)
+                               (beside sub blk sub)
+                               (beside sub sub sub))
+                       )))
+```
+
+Template
+```racket
+(define (genrec-fn d)
+  (cond [(trivial? d) (trivial-answer d)]
+        [else
+         (... d
+              (genrec-fn (next-problem d)))]))
+```
+
+Function
+```racket
+(define (scarpet s)
+  (if (<= s CUTOFF)
+      (square s "outline" "red")
+      (overlay (square s "outline" "red")
+               (local [(define sub (scarpet (/ s 3)))
+                       (define blk (square (/ s 3) "solid" "white"))]
+                  (above (beside sub sub sub)
+                         (beside sub blk sub)
+                         (beside sub sub sub))))))
+```
