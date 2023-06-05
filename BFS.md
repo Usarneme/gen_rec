@@ -22,19 +22,19 @@ no rows, columns, or boxes that contain a duplicate number.
 
 #### Data Definitions
 
-"Val" is a Natural[1, 9]
-
-"Board" is (listof Val|false) that is 81 elements long (9x9)
-
-"Pos" is Natural[0, 80]
+`Val` is a Natural[1, 9]
+`Board` is (listof Val|false) that is 81 elements long (9x9)
+`Pos` is Natural[0, 80]
     interp. the position of a square on the board, for a given p, then
         - the row is quotient p 9
         - the column is remainder p 9
 
-Convert 0-based row and column to Pos
+Convert 0-based row and column to Pos:
+```
 (define (r-c->pos r c) (+ (* r 9) c))
+```
 
-"Unit" is (listof Pos) of length 9
+`Unit` is (listof Pos) of length 9
     interp. the position of every square in a unit. There are 27 of these (9 rows, 9 cols, 9 boxes)
 
 ```
@@ -173,15 +173,11 @@ Convert 0-based row and column to Pos
 (define UNITS (append ROWS COLS BOXES))
 ```
 
-#### Functions
+---
 
-Signature:
-Board -> Board (solution found) or false (no solution found)
-interp.: produce a solution for board, or false if board is unsolveable.
-Assume: board is valid
-
-// templates used:
-// Generative Recursion - https://courses.edx.org/courses/course-v1:UBCx+HtC2x+2T2017/77860a93562d40bda45e452ea064998b/#GenRec
+##### Templates used:
+###### Generative Recursion
+https://courses.edx.org/courses/course-v1:UBCx+HtC2x+2T2017/77860a93562d40bda45e452ea064998b/#GenRec
 ```
 (define (genrec-fn d)
   (cond [(trivial? d) (trivial-answer d)]
@@ -190,7 +186,8 @@ Assume: board is valid
               (genrec-fn (next-problem d)))]))
 ```
 
-// Backtracking Search - https://courses.edx.org/courses/course-v1:UBCx+HtC2x+2T2017/77860a93562d40bda45e452ea064998b/#Backtrack
+###### Backtracking Search
+https://courses.edx.org/courses/course-v1:UBCx+HtC2x+2T2017/77860a93562d40bda45e452ea064998b/#Backtrack
 ```
 define (backtracking-fn x)
   (local [(define (fn-for-x x)
@@ -207,7 +204,7 @@ define (backtracking-fn x)
     (fn-for-x x)))
 ```
 
-// Abitrary-arity Tree
+###### Abitrary-arity Tree
 ```
 (define (solve bd)
   (local [(define (solve--bd bd)
@@ -224,54 +221,7 @@ define (backtracking-fn x)
     (solve--bd bd)))
 ```
 
-```
-(check-expect (solve BD4) BD4s)
-(check-expect (solve BD5) BD5s)
-(check-expect (solve BD6) false)
-
-// stub:
-(define (solve bd) false)
-```
-
-// template:
-```
-(define (solve bd)
-    (local [(define (solve--bd bd)            // consumes Board
-        (if (solved? bd)
-            bd                                // solved=true, return board
-        (solve--lobd) (next-boards bd))))     // not solved, try the next boards in tree
-
-        (define (solve-lobd lobd)             // consumes (listof Board)
-            (cond [(empty? lobd) false]       // if we've reached the end of the tree, there is no solution
-            [else
-                (local [(define try (solve--bd (first lobd)))]
-                    (if (not (false? try))
-                        try
-                        (solve--lobd (rest lobd))))]))]
-
-        (solve--bd bd)))
-```
-
-#### Signatures and Tests
-// Board Pos -> Val or false
-// Produce value at given position on board
-```
-(check-expect (read-square DB2 (r-c->pos 0 5)) 6)
-(check-expect (read-square DB3 (r-c->pos 7 0)) 8)
-
-(define (read-square bd p)
-    (list-ref bd p))
-
-// Board Pos Val -> Board
-// produce new board with val at given position
-(check-expect (fill-square BD1 (r-c->pos 0 0) 1)
-    (cons 1 (rest BD1)))
-
-(define (fill-square bd p nv)
-    (append (take bd p)
-            (list nv)
-            (drop bd (add1 p))))
-```
+---
 
 #### Solver
 
@@ -287,17 +237,224 @@ We are generating an arbitrary-arity tree and doing backtracking search over it.
 - Arbitrary-arity tree
 - Backtracking search
 
+![Triple Template With Highlighting](templates.png)
+
 ##### Template Blending
 
 Take the 3 (above) function templates and blend them together.
 
 Templates are an answer to a very simple question; given what I know about the signature, how much do I know about the details of the function?
 
+---
+
+#### Functions
+
+`solve`
+Signature: Board -> Board (solution found) or false (no solution found)
+interp.: produce a solution for board, or false if board is unsolveable.
+Assume: board is valid
+
+Stub and Tests:
+```
+(define (solve bd) false) ;stub
+
+(check-expect (solve BD4) BD4s)
+(check-expect (solve BD5) BD5s)
+(check-expect (solve BD6) false)
+```
+
+Function:
+```
+(define (solve bd)
+    (local [(define (solve--bd bd)                  // consumes Board
+        (if (solved? bd)                            // "solved" is a wishlist helper func
+            bd                                      // solved=true, return board
+        (solve--lobd) (next-boards bd))))           // not solved, try the next boards in tree, "next-boards" is a wishlist helper func
+
+        (define (solve--lobd lobd)                  // consumes (listof Board)
+            (cond [(empty? lobd) false]             // if we've reached the end of the tree, there is no solution
+            [else
+                (local [(define try (solve--bd (first lobd)))]
+                    (if (not (false? try))
+                        try
+                        (solve--lobd (rest lobd))))]))]
+
+        (solve--bd bd)))
+```
+
+#### Wishlist Helper Functions
+
+1. `solved`
+    Signature: Board -> Boolean
+    produce true if board is solved
+    Assume: board is valid, therefore full = solved
 
 
+    Stub and Tests:
+    ```
+    (define (solved? bd) false)
+
+    (check-expect (solved? BD1) false)
+    (check-expect (solved? BD2) false)
+    (check-expect (solved? BD4s) true)
+    ```
+
+2. `completed`
+    if every square is a Natural (not false)
+    ```
+    (define (completed? bd)
+        andmap number? bd))
+    ```
+
+3. `next-boards`
+    Signature: Board -> listof Board
+    produce list of valid next boards from Board
+    finds first empty square, fills it with Natural[1, 9], keeps only valid boards
+    !!!
+
+    Stub and Test:
+    ```
+    (define (next-boards bd) empty)
+
+    (check-expect (next-boards (cons 1 (rest BD1)))
+                (cons 1 (cons 2 (rest (rest BD1)))
+                (cons 1 (cons 3 (rest (rest BD1)))
+                (cons 1 (cons 4 (rest (rest BD1)))
+                (cons 1 (cons 5 (rest (rest BD1)))
+                (cons 1 (cons 6 (rest (rest BD1)))
+                (cons 1 (cons 7 (rest (rest BD1)))
+                (cons 1 (cons 8 (rest (rest BD1)))
+                (cons 1 (cons 9 (rest (rest BD1)))
+                (cons 1 (cons 2 (rest (rest BD1)))))
+    ```
+
+    Template:
+    ```
+    (define (next-boards bd)
+        (keep-only-valid (fill-with-1-9 (find-blank bd) bd)))
+    ```
+
+4. `find-blank`
+    Board -> Pos
+    produces the position of the first blank square
+    assume board has at least 1 blank square
+    ```
+    (define (find-blank bd) 0) ;stub
+
+    (check-expect (find-blank BD1) 0)
+    (check-expect (find-blank (cons 2 (rest (rest BD1)))) 1)
+    (check-expect (find-blank (const 2 (const 4 (rest (rest BD1))))) 2)
+
+    (define (find-blank bd)
+        (cond [empty? bd (error "No blank space found.")] ;board didn't have a blank space - throw error
+            [else
+                (if (first bd)                            ;Val|false
+                    0
+                    (+ 1 (find-blank (rest bd))))]))
+    ```
+
+5. `fill-with-1-9`
+    Post Board -> (listof Board)
+    produce 9 boards, with blank filled with Natural[1, 9]
+    ```
+    (define (fill-with-1-9 p bd) empty) ;stub
+
+    (check-expect (fill-with-1-9 0 BD1)
+        (list (cons 1 (rest BD1))
+        (list (cons 2 (rest BD1))
+        (list (cons 3 (rest BD1))
+        (list (cons 4 (rest BD1))
+        (list (cons 5 (rest BD1))
+        (list (cons 6 (rest BD1))
+        (list (cons 7 (rest BD1))
+        (list (cons 8 (rest BD1))
+        (list (cons 9 (rest BD1))))
 
 
+    (define (fill-with-1-9 p bd)
+        (local [(define (build-one n)
+            (fill-square bd p (+ 1 n)))]      ;0-9 become 1-9 for the board
+        (build-list 9 build-one)))
+    ```
 
+6. `keep-only-valid`
+    (listof Board) -> (listof Board)
+    produce list containing only valid boards
+    ```
+    (define (keep-only-valid lobd) empty) ;stub
+
+    (check-expect (keep-only-valid (list (cons 1 (cons 1 (rest (rest BD1)))))) ;invalid board, has 2 1s
+                    empty)
+
+    (define (keep-only-valid lobd)
+            (filter valid-board? lobd))
+    ```
+
+7. `valid-board?`
+    Board -> Boolean
+    produce true if no unit on the board has the same value twice, false otherwise
+    ```
+    (define (valid-board? bd) false) ;stub
+
+    (check-expect (valid-board? BD1) true)
+    (check-expect (valid-board? BD2) true)
+    (check-expect (valid-board? BD3) true)
+    (check-expect (valid-board? BD4) true)
+    (check-expect (valid-board? BD5) true)
+    (check-expect (valid-board? (cons 2 (rest BD2))) false) ;replaces first 1 with a 2, so there are 2 2s in the top row
+    (check-expect (valid-board? (cons 2 (rest BD3))) false) ;same as above, but 2 2s in first column
+    (check-expect (valid-board? (fill-square BD4 1 6)) false)
+
+    // check rows, check cols, check squares for any duplicate
+    (define (valid-board? bd)
+        (local [(define (valid-units? lou)              ;(listof Unit) -> Boolean
+                    (andmap valid-unit? lou))
+
+                (define (valid-unit? u)                 ;Unit -> Boolean
+                    (no-duplicates?
+                        (keep-only-values
+                            (read-unit u))))
+
+                (define (read-unit u)                   ;Unit -> listof Val|false
+                    (map read-pos u))
+
+                (define (read-pos p)                    ;Pos -> Val|false
+                    (read-square bd p))                 ;produce content of board at position p - read-square()
+
+                (define (keep-only-values lovf)         ;listof Val|false -> listof Val
+                    (filter number? lovf))              ;only return Natural number, filter out the bools
+
+                (define (no-duplicates? lov)            ;listof Val -> Boolean
+                    (cond [(empty? lov) true]
+                        [else
+                            (if (member (first lov) (rest lov))
+                                false
+                                (no-duplicates? (rest lov)))]))]
+        (valid-units? UNITS)))
+    ```
+
+8. `read-square`
+    Board Pos -> Val or false
+    Produce value at given position on board
+    ```
+    (check-expect (read-square DB2 (r-c->pos 0 5)) 6)
+    (check-expect (read-square DB3 (r-c->pos 7 0)) 8)
+
+    (define (read-square bd p)
+        (list-ref bd p))
+
+    // Board Pos Val -> Board
+    // produce new board with val at given position
+    (check-expect (fill-square BD1 (r-c->pos 0 0) 1)
+        (cons 1 (rest BD1)))
+
+    (define (fill-square bd p nv)
+        (append (take bd p)
+                (list nv)
+                (drop bd (add1 p))))
+    ```
+
+---
 
 
 
