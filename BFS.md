@@ -37,6 +37,7 @@ Convert 0-based row and column to Pos
 "Unit" is (listof Pos) of length 9
     interp. the position of every square in a unit. There are 27 of these (9 rows, 9 cols, 9 boxes)
 
+```
 (define ALL-VALS (list 1 2 3 4 5 6 7 8 9))
 
 // easier than writing FALSE FALSE FALSE -> B B B
@@ -170,19 +171,96 @@ Convert 0-based row and column to Pos
           (list 60 61 62 69 70 71 78 79 80)))
 
 (define UNITS (append ROWS COLS BOXES))
+```
 
 #### Functions
 
+Signature:
+Board -> Board (solution found) or false (no solution found)
+interp.: produce a solution for board, or false if board is unsolveable.
+Assume: board is valid
+
+// templates used:
+// Generative Recursion - https://courses.edx.org/courses/course-v1:UBCx+HtC2x+2T2017/77860a93562d40bda45e452ea064998b/#GenRec
+```
+(define (genrec-fn d)
+  (cond [(trivial? d) (trivial-answer d)]
+        [else
+         (... d
+              (genrec-fn (next-problem d)))]))
+```
+
+// Backtracking Search - https://courses.edx.org/courses/course-v1:UBCx+HtC2x+2T2017/77860a93562d40bda45e452ea064998b/#Backtrack
+```
+define (backtracking-fn x)
+  (local [(define (fn-for-x x)
+            (... (fn-for-lox (x-subs x))))
+
+          (define (fn-for-lox lox)
+            (cond [(empty? lox) false]
+                  [else
+                   (local [(define try (fn-for-x (first lox)))] ;try first child
+                     (if (not (false? try))                     ;successful?
+                         try                                    ;if so produce that
+                         (fn-for-lox (rest lox))))]))]          ;or try rest of children
+
+    (fn-for-x x)))
+```
+
+// Abitrary-arity Tree
+```
+(define (solve bd)
+  (local [(define (solve--bd bd)
+            (if (solved? bd)
+                bd
+                (solve--lobd (next-boards bd))))
+          (define (solve--lobd lobd)
+            (cond [(empty? lobd) false]
+                  [else
+                   (local [(define try (solve--bd (first lobd)))]
+                        (if (not (false? try))
+                            try
+                            (solve--lobd (rest lobd))))]))]
+    (solve--bd bd)))
+```
+
+```
+(check-expect (solve BD4) BD4s)
+(check-expect (solve BD5) BD5s)
+(check-expect (solve BD6) false)
+
+// stub:
+(define (solve bd) false)
+```
+
+// template:
+```
+(define (solve bd)
+    (local [(define (solve--bd bd)            // consumes Board
+        (if (solved? bd)
+            bd                                // solved=true, return board
+        (solve--lobd) (next-boards bd))))     // not solved, try the next boards in tree
+
+        (define (solve-lobd lobd)             // consumes (listof Board)
+            (cond [(empty? lobd) false]       // if we've reached the end of the tree, there is no solution
+            [else
+                (local [(define try (solve--bd (first lobd)))]
+                    (if (not (false? try))
+                        try
+                        (solve--lobd (rest lobd))))]))]
+
+        (solve--bd bd)))
+```
 
 #### Signatures and Tests
 // Board Pos -> Val or false
 // Produce value at given position on board
+```
 (check-expect (read-square DB2 (r-c->pos 0 5)) 6)
 (check-expect (read-square DB3 (r-c->pos 7 0)) 8)
 
 (define (read-square bd p)
     (list-ref bd p))
-
 
 // Board Pos Val -> Board
 // produce new board with val at given position
@@ -193,12 +271,27 @@ Convert 0-based row and column to Pos
     (append (take bd p)
             (list nv)
             (drop bd (add1 p))))
+```
 
+#### Solver
 
+Take a board, find the first empty square, generate 9 copies of this board with the empty square
+filled with numbers 1-9. You can immediately determine some of those boards are invalid (duplicate row, col, or box).
 
+Continuing until all squares are filled will eventually leave us with a completed board - or false as the board is invalid.
 
+We are generating an arbitrary-arity tree and doing backtracking search over it.
 
+3 core aspects of our solution:
+- Generative recursion
+- Arbitrary-arity tree
+- Backtracking search
 
+##### Template Blending
+
+Take the 3 (above) function templates and blend them together.
+
+Templates are an answer to a very simple question; given what I know about the signature, how much do I know about the details of the function?
 
 
 
