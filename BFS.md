@@ -437,21 +437,26 @@ Function:
     Board Pos -> Val or false
     Produce value at given position on board
     ```
-    (check-expect (read-square DB2 (r-c->pos 0 5)) 6)
-    (check-expect (read-square DB3 (r-c->pos 7 0)) 8)
+    (check-expect (read-square BD2 (r-c->pos 0 5)) 6)
+    (check-expect (read-square BD3 (r-c->pos 7 0)) 8)
 
     (define (read-square bd p)
-        (list-ref bd p))
+        (list-ref bd p))                                ;list-ref returns the element of bd at position p
+    ```
 
-    // Board Pos Val -> Board
-    // produce new board with val at given position
+9.  `fill-square`
+    Board Pos Val -> Board
+    produce new board with val at given position
+    ```
     (check-expect (fill-square BD1 (r-c->pos 0 0) 1)
         (cons 1 (rest BD1)))
 
     (define (fill-square bd p nv)
-        (append (take bd p)
-                (list nv)
-                (drop bd (add1 p))))
+        (append                                 ;combines all of the args into a new list
+            (take bd p)                         ;take makes a copy of a list from [0-p] inclusive
+            (list nv)                           ;create a list from the new value
+            (drop bd                            ;drop returns a copy of the list bd after position p - (drop (list 1 2 3 4 5) 2) => (3 4 5)
+                (add1 p))))                     ;increase p by one
     ```
 
 ---
