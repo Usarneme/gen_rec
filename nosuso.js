@@ -35,11 +35,11 @@ const isBoardValid = (board) => {
 
 }
 
-const areUnitsValid = (board, units) => units.map(isUnitValid)
+const areUnitsValid = (board, units) => units.every((unit) => isUnitValid(board, unit))
 const isUnitValid = (board, unit) => hasNoDuplicates(keepOnlyValues(readSquare(board, unit)))
 
-// const readUnits = (board, position) =>
-// const readPosition = (board, position) =>
+// const readUnit = (board, position) => 
+const readPosition = (board, position) => readSquare(board, position)
 
 // Convert 0-based row and column values to a position
 const getPosition = (board, row, column) => board[(row * 9) + column]
